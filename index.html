@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox AFK Script Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10 min-h-screen flex items-center justify-center">
+
+    <div class="card bg-white p-6 md:p-10 rounded-xl max-w-lg w-full">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">AFK Script Generator</h1>
+        <p class="text-sm text-red-600 font-semibold mb-6 p-2 bg-red-50 rounded-lg border border-red-200">
+            ⚠️ **WARNING:** This script uses automation that may violate Roblox's Terms of Service and could lead to a ban. Use at your own risk.
+        </p>
+
+        <!-- Input Field -->
+        <label for="serverLink" class="block text-lg font-medium text-gray-700 mb-2">
+            Enter your Private Server Link:
+        </label>
+        <input type="url" id="serverLink" placeholder="e.g., https://www.roblox.com/games/12345/My-Game?privateServerLinkCode=..." 
+               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 mb-6 text-sm"
+               required>
+
+        <!-- Action Button -->
+        <button id="generateButton" onclick="generateAndDownloadScript()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-150 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-blue-500/50">
+            Generate & Download Customized AFK Script
+        </button>
+
+        <!-- Status Message -->
+        <p id="statusMessage" class="mt-4 text-center text-sm text-gray-500"></p>
+
+        <!-- Script Template (Hidden) -->
+        <script id="pythonTemplate" type="text/plain">
+import time
+import webbrowser
+import pyautogui
+import platform
+
+# --- Configuration ---
+# Wait time between server checks (in seconds). 15 minutes = 900 seconds.
+# This macro assumes you need to leave and rejoin every 15 minutes to prevent kick.
+CHECK_INTERVAL = 900 
+# Small delay to allow the game to react to the simulated keypress.
+KEY_DELAY = 0.5 
+
+# The private server link you entered on the website.
+PRIVATE_SERVER_LINK = '[SERVER_LINK_PLACEHOLDER]' 
+
+def exponential_backoff_fetch(url):
+    """Placeholder for a function that handles opening the browser link."""
+    print(f"Opening browser link: {url}")
+    try:
+        # Use open() to launch the link, which should trigger the Roblox client
+        webbrowser.open(url)
+        print("Successfully initiated server rejoin via web browser.")
+    except Exception as e:
+        print(f"Error opening link: {e}")
+
+def leave_roblox_server():
+    """Simulates the standard Roblox keypress sequence to open the menu and leave the game."""
+    
+    # NOTE: This only works if the Roblox window is currently focused on your desktop.
+    
+    print("--- Initiating Leave Sequence (Roblox must be focused!) ---")
+    
+    # 1. Press ESC (Open Menu)
+    pyautogui.press('esc')
+    time.sleep(KEY_DELAY)
+    
+    # 2. Press L (Leave Game)
+    # The 'L' key is often mapped to the 'Leave' button in the menu.
+    pyautogui.press('l')
+    time.sleep(KEY_DELAY)
+
+    # 3. Press ENTER (Confirm Leave)
+    # The 'Enter' key confirms the action.
+    pyautogui.press('enter')
+    time.sleep(KEY_DELAY * 2) # Give a bit more time for the client to close
+
+    print("--- Leave sequence complete. ---")
+
+
+def main():
+    """Main execution loop for the AFK macro."""
+    print("------------------------------------------------------------------")
+    print("Roblox AFK Server Auto-Rejoin Macro (Customized)")
+    print("Rejoin Link set to: " + PRIVATE_SERVER_LINK)
+    print(f"Check interval set to: {CHECK_INTERVAL / 60} minutes.")
+    print("------------------------------------------------------------------")
+    
+    # Wait for the user to switch windows
+    print("\n**START MACRO:** Switch immediately to your Roblox game window.")
+    print("To stop the script, press CTRL+C in this console window.")
+    time.sleep(5) 
+
+    # Main loop
+    while True:
+        try:
+            current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            print(f"\n[{current_time}] Starting server check sequence...")
+            
+            # Step 1: Leave the current (potentially public) server
+            leave_roblox_server()
+
+            # Step 2: Attempt to rejoin the private server
+            print("Attempting to rejoin private server...")
+            exponential_backoff_fetch(PRIVATE_SERVER_LINK)
+
+            print(f"Successfully triggered rejoin. Waiting {CHECK_INTERVAL / 60} minutes for the next check.")
+            
+            # Wait for the next interval
+            time.sleep(CHECK_INTERVAL)
+
+        except KeyboardInterrupt:
+            print("\n[STOPPED] Macro stopped by user (Ctrl+C). Exiting.")
+            break
+        except pyautogui.FailSafeException:
+            # pyautogui provides a failsafe by moving the mouse to the top-left corner
+            print("\n[FAILSAFE] Mouse moved to top-left corner. Script stopped for safety. Exiting.")
+            break
+        except Exception as e:
+            print(f"\n[CRITICAL ERROR] An unexpected error occurred: {e}")
+            print("Restarting loop after 30 seconds.")
+            time.sleep(30)
+
+if __name__ == "__main__":
+    main()
+        </script>
+    </div>
+
+    <script>
+        function generateAndDownloadScript() {
+            const linkInput = document.getElementById('serverLink');
+            const link = linkInput.value.trim();
+            const statusMessage = document.getElementById('statusMessage');
+
+            if (!link) {
+                statusMessage.textContent = 'Please enter a valid server link.';
+                statusMessage.className = 'mt-4 text-center text-sm text-red-600';
+                return;
+            }
+
+            if (!link.startsWith('http')) {
+                statusMessage.textContent = 'Link must start with http:// or https://';
+                statusMessage.className = 'mt-4 text-center text-sm text-red-600';
+                return;
+            }
+
+            // 1. Get the template content
+            const template = document.getElementById('pythonTemplate').textContent;
+
+            // 2. Replace the placeholder with the user's link
+            const customizedScript = template.replace(
+                "'[SERVER_LINK_PLACEHOLDER]'", 
+                `'${link}'`
+            );
+
+            // 3. Create a Blob (File) from the script content
+            const blob = new Blob([customizedScript], { type: 'text/plain' });
+
+            // 4. Create a temporary URL and trigger the download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'custom_roblox_afk_macro.py';
+            
+            // Append to the DOM temporarily and click it
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            statusMessage.textContent = '✅ Custom script downloaded! See the tutorial for setup steps.';
+            statusMessage.className = 'mt-4 text-center text-sm text-green-600 font-semibold';
+        }
+    </script>
+</body>
+</html>
